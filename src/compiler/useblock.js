@@ -33,10 +33,11 @@ export default {
         compileBody( node.loc, node.body, templateName, childName );
 
         figure.addRuntimeImport( 'insert' );
+
         parent.addBlock(
             sourceNode( node.loc, [
-                `        [ $( '${blockName}' ) ]: ( node, block ) => `,
-                `insert( block, node, ${childName}, ${templateName}, this.dataForBlock(), ${figure.getPathToDocument()}, this.blocks )`
+                `        [ $( '${blockName}' ) ]: ( node, block, blockData ) => `,
+                `insert( block, node, ${childName}, ${templateName}, this._dataForBlock( { [ $( '${node.identifier.name}' ) ]:  blockData } ), ${figure.getPathToDocument()}, this.blocks )`
             ] )
         );
 

@@ -73,15 +73,18 @@ function ForStatementNode( expr, body, options, loc ) {
     this.loc = loc;
 }
 
-function DefBlockStatementNode( name, loc ) {
+function DefBlockStatementNode( name, expression, loc ) {
     this.type = 'DefBlockStatement';
     this.name = name;
+    this.expression = expression;
     this.loc = loc;
 }
 
-function UseBlockStatementNode( name, body, loc ) {
+function UseBlockStatementNode( name, identifier, withCustom, body, loc ) {
     this.type = 'UseBlockStatement';
     this.name = name;
+    this.identifier = identifier;
+    this.withCustom = withCustom;
     this.body = body;
     this.loc = loc;
 }

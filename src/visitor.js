@@ -103,6 +103,7 @@ const visitors = {
     },
     DefBlockStatement: ( node, visitor ) => {
         handle( node, visitor );
+        visit( node.expression, visitor );
     },
     UseBlockStatement: ( node, visitor ) => {
         handle( node, visitor );
@@ -116,6 +117,7 @@ const visitors = {
     },
     LetStatement: ( node, visitor ) => {
         handle( node, visitor );
+        visit( node.expression, visitor );
     },
     FilterExpression: ( node, visitor ) => {
         handle( node, visitor );

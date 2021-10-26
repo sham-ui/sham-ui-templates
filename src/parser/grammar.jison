@@ -123,6 +123,7 @@ AttributeText [^\"{]+
 <expr>"unsafe"                     return "UNSAFE";
 <expr>"defblock"                   return "DEFBLOCK"
 <expr>"block"                      return "BLOCK"
+<expr>"with"                       return "WITH"
 <expr>"endblock"                   return "ENDBLOCK"
 <expr>"let"                        return "LET"
 <expr>{Identifier}                 return "IDENTIFIER";
@@ -364,20 +365,50 @@ ForStatement
     ;
 
 DefBlockStatement
-    :  "{%" DEFBLOCK StringLiteral "%}"
+    :  "{%" DEFBLOCK Expression "%}"
         {
-            $$ = new DefBlockStatementNode($3, createSourceLocation(@1, @4));
+            $$ = new DefBlockStatementNode(
+                new LiteralNode("'default'", createSourceLocation(@1, @3)),
+                $3,
+                createSourceLocation(@1, @4)
+            );
+        }
+    |  "{%" DEFBLOCK StringLiteral Expression "%}"
+        {
+            $$ = new DefBlockStatementNode($3, $4, createSourceLocation(@1, @5));
+        }
+    |  "{%" DEFBLOCK StringLiteral "%}"
+        {
+            $$ = new DefBlockStatementNode(
+                $3,
+                new ObjectExpressionNode([], createSourceLocation(@1, @4)),
+                createSourceLocation(@1, @4)
+            );
         }
     | "{%" DEFBLOCK "%}"
         {
-            $$ = new DefBlockStatementNode(new LiteralNode("'default'", createSourceLocation(@1, @3)), createSourceLocation(@1, @3));
+            $$ = new DefBlockStatementNode(
+                new LiteralNode("'default'", createSourceLocation(@1, @3)),
+                new ObjectExpressionNode([], createSourceLocation(@1, @3)),
+                createSourceLocation(@1, @3)
+            );
         }
     ;
 
 UseBlockStatement
-    :  "{%" BLOCK StringLiteral "%}" ElementList "{%" ENDBLOCK "%}"
+    :  "{%" BLOCK StringLiteral WITH IdentifierName "%}" ElementList "{%" ENDBLOCK "%}"
         {
-            $$ = new UseBlockStatementNode($3, $5, createSourceLocation(@1, @8));
+            $$ = new UseBlockStatementNode($3, $5, true, $7, createSourceLocation(@1, @8));
+        }
+    |  "{%" BLOCK StringLiteral "%}" ElementList "{%" ENDBLOCK "%}"
+        {
+            $$ = new UseBlockStatementNode(
+                $3,
+                new IdentifierNode("blockData", createSourceLocation(@1, @8)),
+                false,
+                $5,
+                createSourceLocation(@1, @8)
+            );
         }
     ;
 

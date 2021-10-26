@@ -1,4 +1,4 @@
-import { compile, compileAsSFC, renderComponent } from './helpers';
+import { compile, compileAsSFC, compileWithOptions, renderComponent } from './helpers';
 
 beforeEach( () => {
     window.LinkTo = compile`
@@ -369,3 +369,126 @@ it( 'should correct resolve owner', () => {
 } );
 
 
+it( 'should work with compound components pattern', () => {
+    window.SelectItems = compileAsSFC`
+        <template>
+            {% defblock this.dataForBlock( selected, onChange ) %}
+        </template>
+        <script>
+            export default Component( Template, function( options, update ) { 
+                options( {
+                    onChange() {},
+                    selected: -1
+                } );
+                
+                this.dataForBlock = ( selected, onChange ) => ( {
+                    selected,
+                    onSelect( item ) {
+                        update( { selected: item } );
+                        onChange( item )
+                    }
+                } )
+            } );
+        </script>
+    `;
+    window.Item = compileWithOptions( {
+        asSingleFileComponent: true,
+        asModule: false,
+        removeDataTest: false
+    } )`
+        <template>
+            <button :onclick={{this.onClick}} class={{selected == item ? 'active' : '' }} data-test-btn={{item}}>
+                {{item}}
+            </button>
+        </template>
+        <script>
+            export default Component( Template, function( options ) { 
+                const state = options( {
+                    onSelect() {},
+                    item: null,
+                    selected: -1
+                } );
+                
+                this.onClick = ( e ) => state.onSelect( state.item );
+            } );
+        </script>
+    `;
+
+    const onChange = jest.fn();
+    const { component, html } = renderComponent(
+        compile`
+            <SelectItems selected={{selected}} onChange={{onChange}}>
+                {% for item of items %}
+                    <Item item={{item}}/>
+                {% endfor %}
+            </SelectItems>
+        `,
+        {
+            onChange,
+            items: [ 1, 2, 3 ],
+            selected: 1,
+            directives: {
+                onclick: class {
+                    constructor() {
+                        this.handler = null;
+                        this.callback = this.callback.bind( this );
+                    }
+
+                    callback( event ) {
+                        this.handler( event );
+                    }
+
+                    bind( node ) {
+                        node.addEventListener( 'click', this.callback );
+                    }
+
+                    unbind( node ) {
+                        node.removeEventListener( 'click', this.callback );
+                    }
+
+                    update( handler ) {
+                        this.handler = handler;
+                    }
+                }
+            }
+        }
+    );
+    expect( html ).toBe(
+        '<button data-test-btn="1" class="active">1</button>' +
+        '<!--0--><button data-test-btn="2" class="">2</button>' +
+        '<!--0--><button data-test-btn="3" class="">3</button><!--0--><!--0--><!--0--><!--0-->'
+    );
+    component.container.querySelector( '[data-test-btn="2"]' ).click();
+    expect( component.container.innerHTML ).toBe(
+        '<button data-test-btn="1" class="">1</button>' +
+        '<!--0--><button data-test-btn="2" class="active">2</button>' +
+        '<!--0--><button data-test-btn="3" class="">3</button><!--0--><!--0--><!--0--><!--0-->'
+    );
+    expect( onChange ).toHaveBeenCalledTimes( 1 );
+    expect( onChange ).toHaveBeenCalledWith( 2 );
+
+    delete window.SelectItems;
+    delete window.Item;
+} );
+
+it( 'should work with block data', () => {
+    window.Label = compile`
+        <span>{% defblock { text: text + '!' } %}</span>
+    `;
+
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}>
+                {% block 'default' with labelData %}
+                    Block data: {{labelData.text}}
+                {% endblock %}
+            </Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span> Block data: foo! <!--0--></span><!--0-->' );
+
+    delete window.Label;
+} );

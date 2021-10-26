@@ -1,3 +1,10 @@
+## master
+* Update dependencies
+* Fix visitor 
+* Add pass data to blocks 
+* Auto pass block data to component by default
+* Reduce generated code for `{% defblock %}` 
+
 ## 5.0.0-alpha.11
 * Update dependencies
 

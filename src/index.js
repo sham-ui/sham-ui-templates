@@ -2,6 +2,7 @@ import { parser } from './parser';
 import { compile } from './compiler';
 import { entity } from './transform/entity';
 import { defaultBlock } from './transform/defaultblock';
+import { useBlockWithCompound } from './transform/useblock';
 import { sfc } from './transform/sfc';
 import { thisDollarSign } from './transform/this-dollar-sign';
 import { whitespace } from './optimize/whitespace';
@@ -15,7 +16,14 @@ export class Compiler {
             asSingleFileComponent: false,
             removeDataTest: true
         }, options );
-        this.transforms = [ whitespace, entity, thisDollarSign, defaultBlock, sfc ];
+        this.transforms = [
+            whitespace,
+            entity,
+            thisDollarSign,
+            defaultBlock,
+            useBlockWithCompound,
+            sfc
+        ];
         this.globals = [
             'window',
             'Array',

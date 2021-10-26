@@ -53,8 +53,8 @@ export function compile( strings ) {
 
 export function compileWithOptions( options ) {
     const compilerWithOptions = new Compiler( {
-        ...options,
-        asModule: true
+        asModule: true,
+        ...options
     } );
     return function( strings ) {
         const node = sourceNode( '' );
