@@ -1,3 +1,6 @@
+## 5.0.0-alpha.13
+* Fix update blocks data for spread attributes
+
 ## 5.0.0-alpha.12
 * Update dependencies
 * Fix visitor 

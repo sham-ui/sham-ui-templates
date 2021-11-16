@@ -34,7 +34,7 @@ export default {
                 let [ expr ] = compileToExpression( figure, attr, compile );
                 const variables = collectVariables( figure.getScope(), expr );
                 let spreadSN = sourceNode( node.loc,
-                    `            insert( this, ${placeholder}, ${childName}, ${templateName}, ${compile( expr )}, ${figure.getPathToDocument()} )`
+                    `            insert( this, ${placeholder}, ${childName}, ${templateName}, ${compile( expr )}, ${figure.getPathToDocument()}, ${blockRef} )`
                 );
                 if ( variables.length > 0 ) {
                     figure.spot( variables ).add( spreadSN );
