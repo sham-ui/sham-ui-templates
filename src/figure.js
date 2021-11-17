@@ -14,6 +14,7 @@ export class Figure {
         this.declarations = [];
         this.constructions = [];
         this.directives = [];
+        this.directiveAliases = new Map();
         this.renderActions = [];
         this.subFigures = [];
         this.spots = {};
@@ -132,6 +133,7 @@ export class Figure {
                 '\n',
                 '    // Extra render actions\n',
                 '    this.onRender = () => {\n',
+                this.generateDirectiveAliases(), '\n',
                 sourceNode( this.renderActions ).join( '\n' ), '\n',
                 '    };\n',
                 '\n'
@@ -290,6 +292,14 @@ export class Figure {
         return sourceNode( null, parts ).join( '\n' );
     }
 
+    generateDirectiveAliases() {
+        const parts = [];
+        this.directiveAliases.forEach( ( alias, name ) => {
+            parts.push( `        const ${alias} = this.directives.${ name };` );
+        } );
+        return sourceNode( null, parts ).join( '\n' );
+    }
+
     uniqid( name = 'default' ) {
         if ( !this.uniqCounters[ name ] ) {
             this.uniqCounters[ name ] = 0;
@@ -383,8 +393,13 @@ export class Figure {
         this.onRemove.push( node );
     }
 
-    addDirective( node ) {
+    addDirective( node, name ) {
         this.directives.push( node );
+        this.directiveAliases.set( name, `directive_${name}` );
+    }
+
+    getDirectiveAlias( name ) {
+        return this.directiveAliases.get( name );
     }
 
     addBlock( componentName, block ) {

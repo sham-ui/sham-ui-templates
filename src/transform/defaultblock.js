@@ -21,7 +21,7 @@ function replaceBodyToUseDefaultBlock( node ) {
     if ( undefined === useBlockNode ) {
         const useDefaultBlockNode = new ast.UseBlockStatementNode(
             new ast.LiteralNode( '\'default\'' ),
-            new ast.IdentifierNode( 'blockData' ),
+            null,
             false,
             node.body,
             node.loc

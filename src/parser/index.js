@@ -266,13 +266,7 @@ case 46:
 break;
 case 47:
 
-            this.$ = new UseBlockStatementNode(
-                $$[$0-5],
-                new IdentifierNode("blockData", createSourceLocation(_$[$0-7], _$[$0])),
-                false,
-                $$[$0-3],
-                createSourceLocation(_$[$0-7], _$[$0])
-            );
+            this.$ = new UseBlockStatementNode( $$[$0-5], null, false, $$[$0-3], createSourceLocation(_$[$0-7], _$[$0]) );
         
 break;
 case 48:

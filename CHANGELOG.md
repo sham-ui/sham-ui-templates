@@ -1,3 +1,7 @@
+## 5.0.0-alpha.14
+* Generate unique name for block data
+* Reduce generated code size for directives
+
 ## 5.0.0-alpha.13
 * Fix update blocks data for spread attributes
 

@@ -402,13 +402,7 @@ UseBlockStatement
         }
     |  "{%" BLOCK StringLiteral "%}" ElementList "{%" ENDBLOCK "%}"
         {
-            $$ = new UseBlockStatementNode(
-                $3,
-                new IdentifierNode("blockData", createSourceLocation(@1, @8)),
-                false,
-                $5,
-                createSourceLocation(@1, @8)
-            );
+            $$ = new UseBlockStatementNode( $3, null, false, $5, createSourceLocation(@1, @8) );
         }
     ;
 
