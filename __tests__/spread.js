@@ -12,31 +12,6 @@ afterEach( () => {
     delete window.SpreadCustom;
 } );
 
-it( 'should render arrays', async() => {
-    expect.assertions( 3 );
-    const { html, component } = await renderComponent(
-        compile`
-            <ul>
-                {% for key, value of list %}
-                    <li>{{ key }}:{{ value }}</li>
-                {% endfor %}
-            </ul>
-        `,
-        {
-            list: [ 1, 2, 3 ]
-        }
-    );
-    expect( html ).toBe( '<ul><li>0:1</li><li>1:2</li><li>2:3</li></ul>' );
-
-    component.update( { list: [ 1, 3 ] } );
-    expect( component.container.innerHTML ).toBe( '<ul><li>0:1</li><li>1:3</li></ul>' );
-
-    component.update( { list: [ 'a', 'b', 'c', 'd' ] } );
-    expect( component.container.innerHTML ).toBe(
-        '<ul><li>0:a</li><li>1:b</li><li>2:c</li><li>3:d</li></ul>'
-    );
-} );
-
 it( 'should work for html elements', async() => {
     expect.assertions( 1 );
     const { html } = await renderComponent(
@@ -57,7 +32,10 @@ it( 'should work for html elements', async() => {
 it( 'should override default attributes', async() => {
     expect.assertions( 2 );
     const { html, component } = await renderComponent(
-        compile`<div id="foo" {{...attr}}></div>`
+        compile`<div id="foo" {{...attr}}></div>`,
+        {
+            attr: {}
+        }
     );
     expect( html ).toBe( '<div id="foo"></div>' );
 
@@ -76,6 +54,7 @@ it( 'should override variables attributes', async() => {
             <div id="{{ id }}" {{...attr}}></div>
         `,
         {
+            attr: {},
             id: 'foo'
         }
     );
@@ -125,7 +104,10 @@ it( 'should work for custom tags with constant attributes values', async() => {
             <div>
                 <SpreadCustom {{...attr}} foo="foo"/>
             </div>
-        `
+        `,
+        {
+            attr: {}
+        }
     );
     expect( html ).toBe( '<div><i>foo</i><i></i><i></i></div>' );
 
@@ -143,7 +125,7 @@ it( 'should work for custom tags with constant attributes values', async() => {
         }
     } );
     expect( component.container.innerHTML ).toBe(
-        '<div><i>over foo</i><i>boo</i><i>bar</i></div>'
+        '<div><i>foo</i><i>boo</i><i>bar</i></div>'
     );
 } );
 
@@ -154,9 +136,12 @@ it( 'should work for custom tags with attributes with values', async() => {
             <div>
                 <SpreadCustom {{...attr}} foo="{{ foo }}"/>
             </div>
-        `
+        `,
+        {
+            attr: {}
+        }
     );
-    expect( html ).toBe( '<div></div>' );
+    expect( html ).toBe( '<div><i></i><i></i><i></i></div>' );
 
     component.update( {
         attr: {
@@ -178,6 +163,131 @@ it( 'should work for custom tags with attributes with values', async() => {
         foo: 'for'
     } );
     expect( component.container.innerHTML ).toBe( '<div><i>for</i><i>boo</i><i>bar</i></div>' );
+} );
+
+it( 'should work for custom tags with attributes with values and before spread', async() => {
+    expect.assertions( 4 );
+    const { html, component } = await renderComponent(
+        compile`
+            <div>
+                <SpreadCustom foo={{ foo }} {{...attr}}/>
+            </div>
+        `,
+        {
+            attr: {}
+        }
+    );
+    expect( html ).toBe( '<div><i></i><i></i><i></i></div>' );
+
+    component.update( {
+        attr: {
+            boo: 'boo',
+            bar: 'bar'
+        }
+    } );
+    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
+
+    component.update( {
+        foo: 'foo'
+    } );
+    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+
+    component.update( {
+        attr: {
+            foo: 'over foo'
+        },
+        foo: 'for'
+    } );
+    expect( component.container.innerHTML ).toBe(
+        '<div><i>over foo</i><i>boo</i><i>bar</i></div>'
+    );
+} );
+
+it( 'should work for custom tags with attributes with values and spread between attrs', async() => {
+    expect.assertions( 4 );
+    const { html, component } = await renderComponent(
+        compile`
+            <div>
+                <SpreadCustom foo={{ foo }} {{...attr}} bar={{ bar }}/>
+            </div>
+        `,
+        {
+            attr: {}
+        }
+    );
+    expect( html ).toBe( '<div><i></i><i></i><i></i></div>' );
+
+    component.update( {
+        attr: {
+            boo: 'boo',
+            bar: 'bar'
+        }
+    } );
+    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i></i></div>' );
+
+    component.update( {
+        foo: 'foo',
+        bar: 'bar'
+    } );
+    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+
+    component.update( {
+        attr: {
+            foo: 'over foo',
+            bar: 'over bar'
+        },
+        foo: 'for',
+        bar: 'original bar'
+    } );
+    expect( component.container.innerHTML ).toBe(
+        '<div><i>over foo</i><i>boo</i><i>original bar</i></div>'
+    );
+} );
+
+it( 'should work for custom tags with two spread', async() => {
+    expect.assertions( 4 );
+    const { html, component } = await renderComponent(
+        compile`
+            <div>
+                <SpreadCustom foo={{ foo }} {{...attr}} {{...rest}}/>
+            </div>
+        `,
+        {
+            attr: {},
+            rest: {}
+        }
+    );
+    expect( html ).toBe( '<div><i></i><i></i><i></i></div>' );
+
+    component.update( {
+        attr: {
+            boo: 'boo',
+            bar: 'bar'
+        }
+    } );
+    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
+
+    component.update( {
+        foo: 'foo',
+        bar: 'bar'
+    } );
+    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+
+    component.update( {
+        attr: {
+            foo: 'over foo',
+            bar: 'over bar'
+        },
+        foo: 'for',
+        bar: 'original bar',
+        rest: {
+            foo: 'rest foo',
+            bar: 'rest bar'
+        }
+    } );
+    expect( component.container.innerHTML ).toBe(
+        '<div><i>rest foo</i><i>boo</i><i>rest bar</i></div>'
+    );
 } );
 
 it( 'should work for custom tags proxy __data__', async() => {

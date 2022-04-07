@@ -1,3 +1,6 @@
+## 5.0.0-alpha.15
+* Merge update for spread attributes with other attribute updates
+
 ## 5.0.0-alpha.14
 * Generate unique name for block data
 * Reduce generated code size for directives

@@ -25,50 +25,52 @@ export default {
         const blockRef = `${childName}_blocks`;
         figure.addBlock( blockRef );
 
+        let dataObjects = [];
         let data = [];
         let variables = [];
+        let hasSpreadAttribute = false;
 
         // Collect info about variables and attributes.
         for ( let attr of node.attributes ) {
+            let [ expr ] = compileToExpression( figure, attr, compile );
+            variables = variables.concat( collectVariables( figure.getScope(), expr ) );
             if ( attr.type === 'SpreadAttribute' ) {
-                let [ expr ] = compileToExpression( figure, attr, compile );
-                const variables = collectVariables( figure.getScope(), expr );
-                let spreadSN = sourceNode( node.loc,
-                    `            insert( this, ${placeholder}, ${childName}, ${templateName}, ${compile( expr )}, ${figure.getPathToDocument()}, ${blockRef} )`
-                );
-                if ( variables.length > 0 ) {
-                    figure.spot( variables ).add( spreadSN );
-                } else {
-                    figure.addOnUpdate( spreadSN );
+                hasSpreadAttribute = true;
+                if ( data.length === 0 && dataObjects.length === 0 ) {
+                    dataObjects.push( '{}' ); // It's first spread
+                } else if ( data.length > 0 ) {
+                    dataObjects.push( `{ ${data.join( ', ' )} }` );
+                    data = [];
                 }
+                dataObjects.push( compile( expr ) );
             } else {
-
-                let [ expr ] = compileToExpression( figure, attr, compile ); // TODO: Add support for default value in custom tag attributes attr={{ value || 'default' }}.
-                variables = variables.concat( collectVariables( figure.getScope(), expr ) );
-
-                let property = sourceNode( node.loc, [ `[ $( '${attr.name}' ) ]: ${compile( expr )}` ] );
-                data.push( property );
-
+                data.push( `[ $( '${attr.name}' ) ]: ${compile( expr )}` );
             }
+        }
+        if ( data.length > 0 ) {
+            dataObjects.push( `{ ${data.join( ', ' )} }` );
         }
 
         variables = unique( variables );
-        data = `{ ${data.join( ', ' )} }`;
 
+        let options = '{}';
+        if ( dataObjects.length === 1 ) {
+            options = dataObjects[ 0 ];
+        } else if ( dataObjects.length > 1 ) {
+            options = `Object.assign( ${dataObjects.join( ', ' )} )`;
+        }
 
         figure.addRuntimeImport( 'insert' );
-        const mountCode = `insert( this, ${placeholder}, ${childName}, ${templateName}, ${data}, ${figure.getPathToDocument()}, ${blockRef} )`;
+        const mountCode = sourceNode( node.loc, `insert( this, ${placeholder}, ${childName}, ${templateName}, ${options}, ${figure.getPathToDocument()}, ${blockRef} )` );
 
         // Add spot for custom attribute or insert on render if no variables in attributes.
         if ( variables.length > 0 ) {
             const spot = figure.spot( variables );
-            spot.add(
-                sourceNode( node.loc, `            ${mountCode}` )
-            );
+            spot.add( mountCode );
+        } else if ( hasSpreadAttribute ) {
+            figure.addOnUpdate( mountCode );
         } else {
-            figure.addRenderActions(
-                sourceNode( node.loc, `        ${mountCode}` )
-            );
+            figure.addRenderActions( mountCode );
         }
 
 
