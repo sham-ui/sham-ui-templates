@@ -1,3 +1,6 @@
+## 5.0.0-alpha.16
+* Update dependencies
+
 ## 5.0.0-alpha.15
 * Merge update for spread attributes with other attribute updates
 
