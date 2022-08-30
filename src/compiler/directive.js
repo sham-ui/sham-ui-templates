@@ -21,7 +21,7 @@ export default {
         figure.addRenderActions(
             sourceNode( node.loc, [
                 `        if ( !${directive} ) {\n`,
-                `            ${directive} = new ${figure.getDirectiveAlias( node.name )}( ${figure.getPathToDocument()} );\n`,
+                `            ${directive} = new ${figure.getDirectiveAlias( node.name )}( this.ctx.owner );\n`,
                 '        }\n',
                 `        ${directive}.bind( ${parent.reference} );`
             ] )

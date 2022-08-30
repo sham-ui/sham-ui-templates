@@ -101,6 +101,9 @@ const visitors = {
             visit( node.body[ i ], visitor );
         }
     },
+    DebuggerStatement: ( node, visitor ) => {
+        handle( node, visitor );
+    },
     DefBlockStatement: ( node, visitor ) => {
         handle( node, visitor );
         visit( node.expression, visitor );

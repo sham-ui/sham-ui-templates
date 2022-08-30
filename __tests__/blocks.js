@@ -99,7 +99,7 @@ it( 'should work with component arguments', () => {
     component.update( {
         url: 'http://foo.example.com'
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         // eslint-disable-next-line max-len
         '<div><a href="http://foo.example.com"> Text for http://foo.example.com <!--0--></a></div>'
     );
@@ -125,7 +125,7 @@ it( 'should work with component default block', () => {
     component.update( {
         url: 'http://foo.example.com'
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         // eslint-disable-next-line max-len
         '<div><a href="http://foo.example.com"> Text for http://foo.example.com<!--0--></a></div>'
     );
@@ -158,13 +158,13 @@ it( 'should remove block in if', () => {
         visible: false,
         data: 'foz'
     } );
-    expect( component.container.innerHTML ).toBe( '<!--0--><!--0-->' );
+    expect( component.ctx.container.innerHTML ).toBe( '<!--0--><!--0-->' );
 
     component.update( {
         visible: true,
         data: 'foo'
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div class="content"> Text content for foo<!--0--></div><!--0--><!--0-->'
     );
     delete window.VisibleBlock;
@@ -194,12 +194,12 @@ it( 'should work with two nested if', () => {
     component.update( {
         big: true
     } );
-    expect( component.container.innerHTML ).toBe( '<!--0--><!--0--><!--0-->' );
+    expect( component.ctx.container.innerHTML ).toBe( '<!--0--><!--0--><!--0-->' );
 
     component.update( {
         red: true
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         // eslint-disable-next-line max-len
         '<button class="big red">This button big=true, red=true big &amp;&amp; red <!--0--></button><!--0--><!--0--><!--0-->'
     );
@@ -246,20 +246,20 @@ it( 'should work with defblock nested in useblock', () => {
     component.update( {
         loaded: true
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<!--0--><!--0--><!--0--><!--0--><!--0--><!--0-->'
     );
 
     component.update( {
         visible: true
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<!--0--><!--0--><!--0--><!--0--><!--0--><!--0--><!--0--><!--0-->'
     );
     component.update( {
         red: true
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         // eslint-disable-next-line max-len
         ' red &amp;&amp; loaded &amp; visible <!--0--><!--0--><!--0--><!--0--><!--0--><!--0--><!--0--><!--0--><!--0-->'
     );
@@ -307,7 +307,7 @@ it( 'should work with for', () => {
             'http://foo.example.com'
         ]
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<ul>' +
             // eslint-disable-next-line max-len
             '<li><a href="http://baz.example.com">Text for http://baz.example.com<!--0--></a></li>' +
@@ -331,16 +331,16 @@ it( 'should work useblock if was update from block component', () => {
 
         }
     );
-    expect( component.container.textContent.trim() ).toBe( '' );
+    expect( component.ctx.container.textContent.trim() ).toBe( '' );
 
     const displayContent = Array.from( DI.resolve( 'sham-ui:store' ).byId.values() ).find(
         x => x instanceof window.DisplayContent
     );
     displayContent.update( { condition: true } );
-    expect( component.container.textContent.trim() ).toBe( 'Content' );
+    expect( component.ctx.container.textContent.trim() ).toBe( 'Content' );
 
     displayContent.update( { condition: false } );
-    expect( component.container.textContent.trim() ).toBe( '' );
+    expect( component.ctx.container.textContent.trim() ).toBe( '' );
 } );
 
 
@@ -365,7 +365,7 @@ it( 'should correct resolve owner', () => {
             </script>
         `
     );
-    expect( component.container.textContent.trim() ).toBe( 'Text for content' );
+    expect( component.ctx.container.textContent.trim() ).toBe( 'Text for content' );
 } );
 
 
@@ -375,8 +375,8 @@ it( 'should work with compound components pattern', () => {
             {% defblock this.dataForBlock( selected, onChange ) %}
         </template>
         <script>
-            export default Component( Template, function( options, update ) { 
-                options( {
+            export default Component( Template, function( options ) { 
+                const state = options( {
                     onChange() {},
                     selected: -1
                 } );
@@ -384,7 +384,7 @@ it( 'should work with compound components pattern', () => {
                 this.dataForBlock = ( selected, onChange ) => ( {
                     selected,
                     onSelect( item ) {
-                        update( { selected: item } );
+                        state.selected = item;
                         onChange( item )
                     }
                 } )
@@ -426,7 +426,9 @@ it( 'should work with compound components pattern', () => {
         {
             onChange,
             items: [ 1, 2, 3 ],
-            selected: 1,
+            selected: 1
+        },
+        {
             directives: {
                 onclick: class {
                     constructor() {
@@ -458,8 +460,8 @@ it( 'should work with compound components pattern', () => {
         '<!--0--><button data-test-btn="2" class="">2</button>' +
         '<!--0--><button data-test-btn="3" class="">3</button><!--0--><!--0--><!--0--><!--0-->'
     );
-    component.container.querySelector( '[data-test-btn="2"]' ).click();
-    expect( component.container.innerHTML ).toBe(
+    component.ctx.container.querySelector( '[data-test-btn="2"]' ).click();
+    expect( component.ctx.container.innerHTML ).toBe(
         '<button data-test-btn="1" class="">1</button>' +
         '<!--0--><button data-test-btn="2" class="active">2</button>' +
         '<!--0--><button data-test-btn="3" class="">3</button><!--0--><!--0--><!--0--><!--0-->'

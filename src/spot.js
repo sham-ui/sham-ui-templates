@@ -18,28 +18,30 @@ export class Spot {
             `( ${this.variables.join( ', ' )} ) => `
         );
 
-        const isMultilineOperation = (
+        const isMultiLineOperation = (
             this.declaredVariables > 0 ||
             this.operators.length > 1
         );
-        if ( isMultilineOperation ) {
+        if ( isMultiLineOperation ) {
             sn.add( '{\n' );
         }
 
+        const space = isMultiLineOperation ? '                ' : '';
         Object.keys( this.declaredVariables ).forEach( name => {
-            sn.add( `                let ${name};\n` );
+            sn.add( `${space}let ${name};\n` );
         } );
 
         if ( this.operators.length > 0 ) {
-            sn.add( sourceNode( this.operators ).join( ';\n' ) );
-            if ( isMultilineOperation ) {
+            sn.add( space );
+            sn.add( sourceNode( this.operators ).join( `;\n${space}` ) );
+            if ( isMultiLineOperation ) {
                 sn.add( ';' );
+                sn.add( '\n' );
             }
-            sn.add( '\n' );
         }
 
-        if ( isMultilineOperation ) {
-            sn.add( '                }' );
+        if ( isMultiLineOperation ) {
+            sn.add( '            }' );
         }
 
 

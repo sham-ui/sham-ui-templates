@@ -18,7 +18,7 @@ export default {
         node.reference = null;
 
         let templateName = figure.name + '_for' + figure.uniqid( 'template_name' );
-        let childrenName = 'children' + figure.uniqid( 'child_name' );
+        let childrenName = 'childLoop' + figure.uniqid( 'child_name' );
         let placeholder;
 
         if ( isSingleChild( parent, node ) ) {
@@ -29,40 +29,28 @@ export default {
             figure.declare( sourceNode( `const ${placeholder} = dom.comment( '${figure.uniqid( 'comment' )}' );` ) );
         }
 
+        figure.addRuntimeImport( 'createLoopContext' );
         figure.addRuntimeImport( 'loop' );
-        figure.addRuntimeImport( 'Map' );
-        figure.declare( sourceNode( `const ${childrenName} = new Map();` ) );
+
+        figure.declareContext(
+            sourceNode( `const ${childrenName} = createLoopContext( this, ${placeholder} );` )
+        );
 
         // for (
 
         let variablesOfExpression = collectVariables( figure.getScope(), node.expr );
 
+        const loopSourceNode = sourceNode( node.loc, [
+            `loop( ${childrenName}, ${templateName}, `,
+            compile( node.expr ),
+            node.options === null ? '' : `, ${wrapWithRef( node.options )}`,
+            ' )'
+        ] );
         if ( variablesOfExpression.length > 0 ) {
-            figure.spot( variablesOfExpression ).add(
-                sourceNode( node.loc, [
-                    `                loop( this, ${placeholder}, ${childrenName}, ${templateName}, `,
-                    compile( node.expr ),
-                    ', ',
-                    (
-                        node.options === null ? 'null' : wrapWithRef( node.options )
-                    ),
-                    `, ${figure.getPathToDocument()}`,
-                    ' )'
-                ] )
-            );
+            figure.spot( variablesOfExpression ).add( loopSourceNode );
         }  else {
             figure.addOnUpdate(
-                sourceNode( node.loc, [
-                    `            loop( this, ${placeholder}, ${childrenName}, ${templateName}, `,
-                    compile( node.expr ),
-                    ', ',
-                    (
-                        node.options === null ? 'null' : wrapWithRef( node.options )
-                    ),
-                    `, ${figure.getPathToDocument()}`,
-                    ' )'
-                ] )
-
+                sourceNode( [ '        ', loopSourceNode ] )
             );
         }
 
@@ -77,13 +65,9 @@ export default {
         }
 
         figure.addOnUpdate(
-            node.options === null ?
-                sourceNode( node.loc, [
-                    `            ${childrenName}.forEach( ( view ) => view.update( view.__state__ ) );`
-                ] ) :
-                sourceNode( node.loc, [
-                    `            ${childrenName}.forEach( ( view ) => view.update( Object.assign( {}, __data__, view.__state__ ) ) );`
-                ] )
+            sourceNode( node.loc, [
+                `        ${childrenName}.onUpdate( __data__ );`
+            ] )
         );
 
         if ( node.options && node.options.value ) {

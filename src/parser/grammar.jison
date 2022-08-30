@@ -106,6 +106,7 @@ AttributeText [^\"{]+
 <expr>"/*"(.|\r|\n)*?"*/"          /* skip comments */
 <expr>"//".*($|\r\n|\r|\n)         /* skip comments */
 <expr>{StringLiteral}              return "STRING_LITERAL";
+<expr>"debugger"                   return "DEBUGGER";
 <expr>"import"                     return "IMPORT";
 <expr>"from"                       return "FROM";
 <expr>"if"                         return "IF";
@@ -314,6 +315,7 @@ Statement
     | ImportStatement
     | IfStatement
     | ForStatement
+    | DebuggerStatement
     | DefBlockStatement
     | UseBlockStatement
     | UnsafeStatement
@@ -363,6 +365,14 @@ ForStatement
             $$ = new ForStatementNode($7, $9, {key: $3, value: $5}, createSourceLocation(@1, @11));
         }
     ;
+
+DebuggerStatement
+    :  "{%" DEBUGGER "%}"
+        {
+            $$ = new DebuggerStatementNode($3, createSourceLocation(@1, @3));
+        }
+    ;
+
 
 DefBlockStatement
     :  "{%" DEFBLOCK Expression "%}"

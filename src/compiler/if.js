@@ -9,8 +9,8 @@ export default {
 
         let templateNameForThen = figure.name + '_if' + figure.uniqid( 'template_name' );
         let templateNameForOtherwise = figure.name + '_else' + figure.uniqid( 'template_name' );
-        let childNameForThen = 'child' + figure.uniqid( 'child_name' );
-        let childNameForOtherwise = 'child' + figure.uniqid( 'child_name' );
+        let childNameForThen = 'childThen' + figure.uniqid( 'child_name' );
+        let childNameForOtherwise = 'childElse' + figure.uniqid( 'child_name' );
         let placeholder;
 
         if ( isSingleChild( parent, node ) ) {
@@ -21,55 +21,50 @@ export default {
             figure.declare( sourceNode( `const ${placeholder} = dom.comment( '${figure.uniqid( 'comment' )}' );` ) );
         }
 
+        figure.addRuntimeImport( 'createChildContext' );
+        figure.addRuntimeImport( 'cond' );
 
-        figure.declare( `const ${childNameForThen} = {};` );
+        figure.declareContext( `const ${childNameForThen} = createChildContext( this, ${placeholder} );` );
 
         if ( node.otherwise ) {
-            figure.declare( `const ${childNameForOtherwise} = {};` );
+            figure.declareContext( `const ${childNameForOtherwise} = createChildContext( this, ${placeholder} );` );
         }
 
         // if (
 
         const variablesOfExpression = collectVariables( figure.getScope(), node.cond );
 
-        figure.addRuntimeImport( 'cond' );
-
         if ( variablesOfExpression.length > 0 ) {
             figure.spot( variablesOfExpression ).add(
                 sourceNode( node.loc, [
-                    '                ',
                     node.otherwise ? 'result = ' : '',
-                    `cond( this, ${placeholder}, ${childNameForThen}, ${templateNameForThen}, `, compile(
-                        node.cond ), `, ${figure.getPathToDocument()} )`, node.otherwise ? ';' : ''
+                    `cond( ${childNameForThen}, ${templateNameForThen}, `, compile( node.cond ), ' )'
                 ] )
             );
 
             if ( node.otherwise ) {
                 figure.spot( variablesOfExpression ).add(
                     sourceNode( node.loc, [
-                        '                ',
-                        `cond( this, ${placeholder}, ${childNameForOtherwise}, ${templateNameForOtherwise}, !result, ${figure.getPathToDocument()} );`
+                        `cond( ${childNameForOtherwise}, ${templateNameForOtherwise}, !result )`
                     ] )
                 ).declareVariable( 'result' );
             }
         } else {
             figure.addOnUpdate(
                 sourceNode( node.loc, [
-                    '            ',
-                    node.otherwise ? 'result = ' : '',
-                    `cond( this, ${placeholder}, ${childNameForThen}, ${templateNameForThen}, `, compile(
-                        node.cond ), `, ${figure.getPathToDocument()} )`, node.otherwise ? ';' : ''
+                    '        ',
+                    `cond( ${childNameForThen}, ${templateNameForThen}, ${ compile( node.cond ) }  )`,
+                    node.otherwise ? ';' : ''
                 ] )
             );
 
             if ( node.otherwise ) {
                 figure.addOnUpdate(
                     sourceNode( node.loc, [
-                        '           ',
-                        `cond( this, ${placeholder}, ${childNameForOtherwise}, ${templateNameForOtherwise}, !result, ${figure.getPathToDocument()} )`,
-                        node.otherwise ? ';' : ''
+                        '        ',
+                        `cond( ${childNameForOtherwise}, ${templateNameForOtherwise}, !( ${compile( node.cond )} ) );`
                     ] )
-                ).declareVariable( 'result' );
+                );
             }
         }
 
@@ -82,9 +77,7 @@ export default {
 
             figure.addOnUpdate(
                 sourceNode( loc, [
-                    `            if ( ${childName}.ref ) {\n`,
-                    `                ${childName}.ref.update( __data__ );\n`,
-                    '            }'
+                    `        ${childName}.onUpdate( __data__ );`
                 ] )
             );
         };

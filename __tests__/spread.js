@@ -44,7 +44,7 @@ it( 'should override default attributes', async() => {
             id: 'boo'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div id="boo"></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div id="boo"></div>' );
 } );
 
 it( 'should override variables attributes', async() => {
@@ -65,10 +65,10 @@ it( 'should override variables attributes', async() => {
             id: 'boo'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div id="boo"></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div id="boo"></div>' );
 
     component.update( { id: 'bar', attr: {} } );
-    expect( component.container.innerHTML ).toBe( '<div id="bar"></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div id="bar"></div>' );
 } );
 
 it( 'should work for custom tags', async() => {
@@ -94,7 +94,9 @@ it( 'should work for custom tags', async() => {
             boo: 'Boo-Ya'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>Boo-Ya</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe(
+        '<div><i>foo</i><i>Boo-Ya</i><i>bar</i></div>'
+    );
 } );
 
 it( 'should work for custom tags with constant attributes values', async() => {
@@ -117,14 +119,14 @@ it( 'should work for custom tags with constant attributes values', async() => {
             bar: 'bar'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         attr: {
             foo: 'over foo'
         }
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><i>foo</i><i>boo</i><i>bar</i></div>'
     );
 } );
@@ -149,12 +151,12 @@ it( 'should work for custom tags with attributes with values', async() => {
             bar: 'bar'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         foo: 'foo'
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         attr: {
@@ -162,7 +164,7 @@ it( 'should work for custom tags with attributes with values', async() => {
         },
         foo: 'for'
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>for</i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i>for</i><i>boo</i><i>bar</i></div>' );
 } );
 
 it( 'should work for custom tags with attributes with values and before spread', async() => {
@@ -185,12 +187,12 @@ it( 'should work for custom tags with attributes with values and before spread',
             bar: 'bar'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         foo: 'foo'
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         attr: {
@@ -198,7 +200,7 @@ it( 'should work for custom tags with attributes with values and before spread',
         },
         foo: 'for'
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><i>over foo</i><i>boo</i><i>bar</i></div>'
     );
 } );
@@ -223,13 +225,13 @@ it( 'should work for custom tags with attributes with values and spread between 
             bar: 'bar'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i></i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i></i></div>' );
 
     component.update( {
         foo: 'foo',
         bar: 'bar'
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         attr: {
@@ -239,7 +241,7 @@ it( 'should work for custom tags with attributes with values and spread between 
         foo: 'for',
         bar: 'original bar'
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><i>over foo</i><i>boo</i><i>original bar</i></div>'
     );
 } );
@@ -265,13 +267,13 @@ it( 'should work for custom tags with two spread', async() => {
             bar: 'bar'
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i></i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         foo: 'foo',
         bar: 'bar'
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><i>foo</i><i>boo</i><i>bar</i></div>' );
 
     component.update( {
         attr: {
@@ -285,7 +287,7 @@ it( 'should work for custom tags with two spread', async() => {
             bar: 'rest bar'
         }
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><i>rest foo</i><i>boo</i><i>rest bar</i></div>'
     );
 } );
@@ -309,5 +311,7 @@ it( 'should work for custom tags proxy __data__', async() => {
     component.update( {
         boo: 'Boo-Ya'
     } );
-    expect( component.container.innerHTML ).toBe( '<div><i>foo</i><i>Boo-Ya</i><i>bar</i></div>' );
+    expect( component.ctx.container.innerHTML ).toBe(
+        '<div><i>foo</i><i>Boo-Ya</i><i>bar</i></div>'
+    );
 } );

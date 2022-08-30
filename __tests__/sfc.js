@@ -20,7 +20,7 @@ it( 'should single file component work', async() => {
     );
     expect( html ).toBe( '<!--0-->' );
     component.update( { loaded: true } );
-    expect( component.container.innerHTML ).toBe( ' Loaded! <!--0-->' );
+    expect( component.ctx.container.innerHTML ).toBe( ' Loaded! <!--0-->' );
 } );
 
 it( 'should single file component correct work with options', async() => {
@@ -52,7 +52,7 @@ it( 'should single file component correct work with options', async() => {
     );
     expect( html ).toBe( '<!--0-->' );
     component.update( { loaded: true } );
-    expect( component.container.innerHTML ).toBe( 'Text for content<!--0-->' );
+    expect( component.ctx.container.innerHTML ).toBe( 'Text for content<!--0-->' );
 } );
 
 it( 'should single file component correct work with imports', async() => {

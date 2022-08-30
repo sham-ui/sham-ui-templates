@@ -59,9 +59,8 @@ it( 'should be trimmed from html', async() =>{
             <div :show={{ visible }}/>
             <div :content="come {{ text }}"/>
         `,
-        {
-            directives
-        }
+        {},
+        { directives }
     );
     expect( html ).toBe( '<div></div><div></div><div></div>' );
 } );
@@ -79,9 +78,9 @@ it( 'methods bind, update, unbind should be called', async() => {
     const { component } = await renderComponent(
         compile`<div :directive={{ value }}/>`,
         {
-            directives,
             value: true
-        }
+        },
+        { directives }
     );
     expect( directive ).toHaveBeenCalledWith( component );
     expect( directive.prototype.bind ).toHaveBeenCalledWith( component.nodes[ 0 ] );
@@ -108,10 +107,12 @@ it( 'ref directive', async() => {
             </div>
         `,
         {
+            test: true
+        },
+        {
             directives: {
                 ref: window.Ref
-            },
-            test: true
+            }
         }
     );
     expect( component.foo.id ).toBe( 'foo' );
@@ -147,10 +148,12 @@ it( 'ref directive with custom tag', async() => {
             </div>
         `,
         {
+            test: true
+        },
+        {
             directives: {
                 ref: window.Ref
-            },
-            test: true
+            }
         }
     );
     expect( html ).toBe(

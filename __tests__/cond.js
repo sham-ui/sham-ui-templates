@@ -17,10 +17,10 @@ it( 'should properly work', async()=>  {
         );
         expect( html ).toBe( '<div>true: parent data</div>' );
         component.update( { test: false } );
-        expect( component.container.innerHTML ).toBe( '<div></div>' );
+        expect( component.ctx.container.innerHTML ).toBe( '<div></div>' );
 
         component.update( { test: true } );
-        expect( component.container.innerHTML ).toBe( '<div>true: parent data</div>' );
+        expect( component.ctx.container.innerHTML ).toBe( '<div>true: parent data</div>' );
     }
     {
         const { html, component } = await renderComponent(
@@ -39,7 +39,7 @@ it( 'should properly work', async()=>  {
         );
         expect( html ).toBe( '<div> then </div>' );
         component.update( { test: false } );
-        expect( component.container.innerHTML ).toBe( '<div> else </div>' );
+        expect( component.ctx.container.innerHTML ).toBe( '<div> else </div>' );
     }
 } );
 
@@ -65,7 +65,7 @@ it( 'should work with expression', async() => {
     );
     expect( html ).toBe( '<div> (one) <!--0-->3<p>independent</p><!--1--></div>' );
     component.update( { look: 2 } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div> (one) <!--0-->2<p>independent</p><!--1--></div>'
     );
 } );
@@ -88,11 +88,11 @@ it( 'should update only one view', async() => {
     );
     expect( html ).toBe( '<div>old</div>' );
     component.update( { test: false, value: 'new' } );
-    expect( component.container.innerHTML ).toBe( '<div></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div></div>' );
 
     component.update( { test: true } );
-    expect( component.container.innerHTML ).toBe( '<div>new</div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div>new</div>' );
 
     component.update( { test: true, value: 'new' } );
-    expect( component.container.innerHTML ).toBe( '<div>new</div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div>new</div>' );
 } );

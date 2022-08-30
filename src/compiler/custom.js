@@ -11,6 +11,9 @@ export default {
         let childName = 'child' + figure.uniqid( 'child_name' );
         let placeholder;
 
+        figure.addRuntimeImport( 'createChildContext' );
+        figure.addRuntimeImport( 'insert' );
+
         if ( isSingleChild( parent, node ) ) {
             placeholder = parent.reference;
         } else {
@@ -20,10 +23,10 @@ export default {
             figure.declare( sourceNode( `const ${placeholder} = dom.comment( '${figure.uniqid( 'comment' )}' );` ) );
         }
 
-        figure.declare( sourceNode( `const ${childName} = {};` ) );
-
         const blockRef = `${childName}_blocks`;
         figure.addBlock( blockRef );
+
+        figure.declareContext( sourceNode( `const ${childName} = createChildContext( this, ${placeholder}, ${blockRef} );` ) );
 
         let dataObjects = [];
         let data = [];
@@ -60,8 +63,8 @@ export default {
             options = `Object.assign( ${dataObjects.join( ', ' )} )`;
         }
 
-        figure.addRuntimeImport( 'insert' );
-        const mountCode = sourceNode( node.loc, `insert( this, ${placeholder}, ${childName}, ${templateName}, ${options}, ${figure.getPathToDocument()}, ${blockRef} )` );
+
+        const mountCode = sourceNode( node.loc, `insert( ${childName}, ${templateName}, ${options} )` );
 
         // Add spot for custom attribute or insert on render if no variables in attributes.
         if ( variables.length > 0 ) {

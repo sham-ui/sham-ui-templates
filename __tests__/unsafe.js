@@ -25,7 +25,9 @@ it( 'should insert variables as HTML', async() => {
     expect( html ).toBe( '<div></div>' );
 
     component.update( { html: '<a href="javascript:XSS;">Link</a>' } );
-    expect( component.container.innerHTML ).toBe( '<div><a href="javascript:XSS;">Link</a></div>' );
+    expect( component.ctx.container.innerHTML ).toBe(
+        '<div><a href="javascript:XSS;">Link</a></div>'
+    );
 } );
 
 it( 'should remove old DOM nodes and insert new', async() => {
@@ -43,15 +45,15 @@ it( 'should remove old DOM nodes and insert new', async() => {
     expect( html ).toBe( '<div><div>foo</div><br></div>' );
 
     component.update( { html: '<input type="datetime"><hr><div>baz</div>' } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><input type="datetime"><hr><div>baz</div></div>'
     );
 
     component.update( { html: '' } );
-    expect( component.container.innerHTML ).toBe( '<div></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div></div>' );
 
     component.update( { html: '<!-- comment -->' } );
-    expect( component.container.innerHTML ).toBe( '<div><!-- comment --></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><!-- comment --></div>' );
 } );
 
 it( 'should insert unsafe with placeholders', async() => {
@@ -70,7 +72,7 @@ it( 'should insert unsafe with placeholders', async() => {
     expect( html ).toBe( '<div><br><!--0--><hr><!--1--></div>' );
 
     component.update( { html: '<br><!-- comment --><link href="http://ShamUIView.js.org">' } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
 
         // eslint-disable-next-line max-len
         '<div><br><!--0--><br><!-- comment --><link href="http://ShamUIView.js.org"><!--1--></div>'
@@ -96,10 +98,10 @@ it( 'if with unsafe tag', async() => {
     expect( html ).toBe( '<div><div><i>unsafe</i></div></div>' );
 
     component.update( { test: false } );
-    expect( component.container.innerHTML ).toBe( '<div></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div></div>' );
 
     component.update( { test: true } );
-    expect( component.container.innerHTML ).toBe( '<div><div><i>unsafe</i></div></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div><div><i>unsafe</i></div></div>' );
 } );
 
 

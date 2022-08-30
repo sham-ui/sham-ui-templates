@@ -20,7 +20,7 @@ export default {
             sourceNode( node.loc,
                 [
                     '{\n',
-                    `                const ${blockRef} = this.blocks[ $( '${name}' ) ];\n`,
+                    `                const ${blockRef} = this.ctx.blocks[ $( '${name}' ) ];\n`,
                     `                if ( ${blockRef} ) {\n`,
                     `                    ${blockRef}( ${placeholder}, this, ${compile( node.expression )} );\n`,
                     '                }\n',

@@ -36,10 +36,10 @@ it( 'should render arrays', async() => {
     expect( html ).toBe( '<ul><li>0:1</li><li>1:2</li><li>2:3</li></ul>' );
 
     component.update( { list: [ 1, 3 ] } );
-    expect( component.container.innerHTML ).toBe( '<ul><li>0:1</li><li>1:3</li></ul>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<ul><li>0:1</li><li>1:3</li></ul>' );
 
     component.update( { list: [ 'a', 'b', 'c', 'd' ] } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<ul><li>0:a</li><li>1:b</li><li>2:c</li><li>3:d</li></ul>'
     );
 } );
@@ -89,7 +89,7 @@ it( 'should iterate over objects', async() => {
             d: 4
         }
     } );
-    expect( component.container.innerHTML ).toBe( '<div>a: 1; c: 3; d: 4; </div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div>a: 1; c: 3; d: 4; </div>' );
 } );
 
 it( 'should iterate over arrays without options', async() => {
@@ -154,7 +154,7 @@ it( 'should delete old items from childred map with custom tag', async() => {
             }
         ]
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><ul><li>1:a</li><!--0--><li>3:c</li><!--0--></ul></div>'
     );
 } );

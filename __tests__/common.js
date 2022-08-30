@@ -71,7 +71,7 @@ it( 'should save value for variables in complex cases', async() => {
     component.update( {
         foo: 'updated'
     } );
-    expect( component.container.innerHTML ).toBe( '<div class="updated second"></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div class="updated second"></div>' );
 } );
 
 
@@ -148,7 +148,8 @@ it( 'should properly for with filters', async() => {
     };
     const { html } = await renderComponent(
         compile`<p>{{ text | append('case') | upperCase }}</p>`,
-        { filters, text: 'upper_' }
+        { text: 'upper_' },
+        { filters }
     );
     expect( html ).toBe( '<p>UPPER_CASE</p>' );
 } );
@@ -173,7 +174,7 @@ it( 'should work with expressions', async() => {
     );
     expect( html ).toBe( '<a title="150">abc</a>' );
     component.update( { more: { amazing: 'Amazing!' } } );
-    expect( component.container.innerHTML ).toBe( '<a title="150">Amazing!bc</a>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<a title="150">Amazing!bc</a>' );
 } );
 
 it( 'should render empty attributes', async() => {

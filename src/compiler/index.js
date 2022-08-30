@@ -10,6 +10,7 @@ import import_ from './import';
 import if_ from './if';
 import for_ from './for';
 import unsafe from './unsafe';
+import debugger_ from './debugger';
 import defblock from './defblock';
 import useblock from './useblock';
 import let_ from './let';
@@ -26,6 +27,7 @@ const compilers = Object.assign( {},
     if_,
     for_,
     unsafe,
+    debugger_,
     defblock,
     useblock,
     let_

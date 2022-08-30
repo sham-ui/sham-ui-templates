@@ -17,7 +17,7 @@ function buildBindContextAndCallee( bind, figure, compile ) {
     let context;
     if ( staticContext ) {
         if ( staticContext.type === 'ThisExpression' ) {
-            context = figure.getPathToDocument();
+            context = 'this.ctx.owner';
             if ( bind.object ) {
                 callee = compile( bind.callee );
             } else {
@@ -28,7 +28,7 @@ function buildBindContextAndCallee( bind, figure, compile ) {
             context = staticContext.name;
         }
     } else {
-        context = `context${figure.uniqid( 'context' )}`;
+        context = `functionContext${figure.uniqid( 'context' )}`;
         figure.declare( sourceNode( bind.loc, `let ${context.name};` ) );
     }
     if ( bind.object ) {
@@ -77,16 +77,16 @@ export default {
 
         if ( variables.length === 0 && !hasThisExpression( node.expression ) ) {
             figure.construct(
-                sourceNode( node.loc,
-                    [ node.reference, '.textContent = ', compile( node.expression ) ] )
+                sourceNode(
+                    node.loc,
+                    [ node.reference, '.textContent = ', compile( node.expression ) ]
+                )
             );
         } else {
             figure.spot( variables ).add(
-                sourceNode( node.loc,
-                    [
-                        '                ',
-                        node.reference, '.textContent = ', compile( node.expression )
-                    ]
+                sourceNode(
+                    node.loc,
+                    [ node.reference, '.textContent = ', compile( node.expression ) ]
                 )
             );
         }
@@ -98,7 +98,7 @@ export default {
         let prefix = '';
 
         if ( !figure.isInScope( node.callee.name ) ) {
-            prefix = 'this.filters.';
+            prefix = 'this.ctx.filters.';
         }
 
         let sn = sourceNode( node.loc, [ prefix, compile( node.callee ), '( ' ] );
@@ -292,8 +292,8 @@ export default {
         }
     },
 
-    ThisExpression: ( { node, figure } ) => {
-        return sourceNode( node.loc, figure.getPathToDocument() );
+    ThisExpression: ( { node } ) => {
+        return sourceNode( node.loc, 'this.ctx.owner' );
     },
 
     Identifier: ( { node } ) => {

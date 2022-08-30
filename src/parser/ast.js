@@ -73,6 +73,11 @@ function ForStatementNode( expr, body, options, loc ) {
     this.loc = loc;
 }
 
+function DebuggerStatementNode( loc ) {
+    this.type = 'DebuggerStatement';
+    this.loc = loc;
+}
+
 function DefBlockStatementNode( name, expression, loc ) {
     this.type = 'DefBlockStatement';
     this.name = name;
@@ -239,6 +244,7 @@ ast.ExpressionStatementNode = ExpressionStatementNode;
 ast.ImportStatementNode = ImportStatementNode;
 ast.IfStatementNode = IfStatementNode;
 ast.ForStatementNode = ForStatementNode;
+ast.DebuggerStatementNode = DebuggerStatementNode;
 ast.DefBlockStatementNode = DefBlockStatementNode;
 ast.UseBlockStatementNode = UseBlockStatementNode;
 ast.UnsafeStatementNode = UnsafeStatementNode;

@@ -10,11 +10,14 @@ export default {
             throw new Error( 'Usage {% block %} only with custom Component' );
         }
 
+        figure.addRuntimeImport(  'createBlockContext' );
+        figure.addRuntimeImport( 'insert' );
+
         const parentName = getTemplateName( parent.name );
         const blockName = getStringLiteralValue( node.name );
         const templateName = `${figure.name}_${parentName}_block_${blockName}_${figure.uniqid( 'template_name' )}`;
         const childName = 'child' + figure.uniqid( 'child_name' );
-        figure.declare( `const ${childName} = {};` );
+        figure.declareContext( `const ${childName} = createBlockContext( this );` );
 
         let compileBody = ( loc, body, templateName, childName ) => {
             let subfigure = new Figure( templateName, figure );
@@ -23,21 +26,17 @@ export default {
 
             figure.addOnUpdate(
                 sourceNode( loc, [
-                    `        if ( ${childName}.ref ) {\n`,
-                    `            ${childName}.ref.update( __data__ );\n`,
-                    '        }'
+                    `        ${childName}.onUpdate( __data__ );`
                 ] )
             );
         };
 
         compileBody( node.loc, node.body, templateName, childName );
 
-        figure.addRuntimeImport( 'insert' );
-
         parent.addBlock(
             sourceNode( node.loc, [
                 `        [ $( '${blockName}' ) ]: ( node, block, blockData ) => `,
-                `insert( block, node, ${childName}, ${templateName}, this._dataForBlock( { [ $( '${node.identifier.name}' ) ]:  blockData } ), ${figure.getPathToDocument()}, this.blocks )`
+                `insert( ${childName}.setup( block, node ), ${templateName}, this._dataForBlock( { [ $( '${node.identifier.name}' ) ]:  blockData } ) )`
             ] )
         );
 

@@ -40,16 +40,18 @@ it( 'function bind correctly work with directives', () => {
             </script>
         `,
         {
+            handler
+        },
+        {
             directives: {
                 onclick: OnClickEventListener
-            },
-            handler
+            }
         }
     );
     expect( html ).toBe(
         '<button>click me</button>'
     );
-    component.container.querySelector( 'button' ).click();
+    component.ctx.container.querySelector( 'button' ).click();
 
     expect( handler ).toHaveBeenCalledTimes( 1 );
     expect( handler ).toHaveBeenCalledWith( component, 'click' );

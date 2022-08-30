@@ -12,6 +12,7 @@ export class Figure {
         this.functions = {};
         this.imports = [];
         this.declarations = [];
+        this.contexts = [];
         this.constructions = [];
         this.directives = [];
         this.directiveAliases = new Map();
@@ -23,6 +24,7 @@ export class Figure {
         this.onRemove = [];
         this.blocks = {};
         this.domRef = false;
+        this.withDebugger = false;
         this.runtimeImports = new Set();
         if ( parent === null ) {
             this.runtimeImports.add( 'Component' );
@@ -60,7 +62,7 @@ export class Figure {
         }
 
         if ( this.onRemove.length > 0 ) {
-            sn.add( '( options, update, didMount, onRemove ) {\n' );
+            sn.add( '( options, didMount ) {\n' );
         } else {
             sn.add( '() {\n' );
         }
@@ -91,7 +93,6 @@ export class Figure {
 
         if ( this.constructions.length > 0 ) {
             sn.add( [
-                '\n',
                 '    if ( dom.build() ) {\n\n',
                 '        // Construct dom\n',
                 '        ', sourceNode( null, this.constructions ).join( '\n        ' ),
@@ -101,7 +102,6 @@ export class Figure {
 
         if ( this.directives.length > 0 ) {
             sn.add( [
-                '\n',
                 '    // Directives\n',
                 sourceNode( null, this.directives ).join( '\n    ' ),
                 '\n\n'
@@ -110,27 +110,32 @@ export class Figure {
 
         if ( size( this.blocks ) > 0 ) {
             sn.add( [
-                '\n',
                 '    // Blocks\n',
                 this.generateBlocks(),
                 '\n\n'
             ] );
         }
 
+        if ( this.contexts.length > 0 ) {
+            sn.add( [
+                '    // Create contexts\n',
+                '    ', sourceNode( this.contexts ).join( '\n    ' ),
+                '\n\n'
+            ] );
+        }
+
         if ( size( this.spots ) > 0 ) {
             sn.add( [
-                '\n',
                 '    // Update spot functions\n',
-                '    this.spots = [\n',
+                '    this.addSpots( \n',
                 '    ', this.generateSpots(), '\n',
-                '    ];\n',
+                '    );\n',
                 '\n'
             ] );
         }
 
         if ( this.renderActions.length > 0 ) {
             sn.add( [
-                '\n',
                 '    // Extra render actions\n',
                 '    this.onRender = () => {\n',
                 this.generateDirectiveAliases(), '\n',
@@ -142,20 +147,18 @@ export class Figure {
 
         if ( this.onUpdate.length > 0 ) {
             sn.add( [
-                '\n',
                 '    // On update actions\n',
                 '    this.onUpdate = ( __data__ ) => {\n',
                 sourceNode( this.onUpdate ).join( '\n' ), '\n',
-                '     };\n',
+                '    };\n',
                 '\n'
             ] );
         }
 
         if ( this.onRemove.length > 0 ) {
             sn.add( [
-                '\n',
                 '    // On remove actions\n',
-                '    onRemove( () => {\n',
+                '    didMount( () => () => {\n',
                 sourceNode( this.onRemove ).join( '\n' ), '\n',
                 '    } );\n',
                 '\n'
@@ -163,11 +166,13 @@ export class Figure {
         }
 
         sn.add( [
-            '\n',
             '    // Set root nodes\n',
             '    this.nodes = [ ', sourceNode( this.children ).join( ', ' ), ' ];\n'
         ] );
 
+        if ( this.withDebugger ) {
+            sn.add( '\n    debugger;\n' );
+        }
 
         if ( null === this.parent ) {
             sn.add( '};\n' );
@@ -295,7 +300,7 @@ export class Figure {
     generateDirectiveAliases() {
         const parts = [];
         this.directiveAliases.forEach( ( alias, name ) => {
-            parts.push( `        const ${alias} = this.directives.${ name };` );
+            parts.push( `        const ${alias} = this.ctx.directives.${ name };` );
         } );
         return sourceNode( null, parts ).join( '\n' );
     }
@@ -335,10 +340,6 @@ export class Figure {
         }
     }
 
-    getPathToDocument() {
-        return this.parent ? 'this.owner' : 'this';
-    }
-
     getScope() {
         if ( this.parent ) {
             return [].concat( this.scope ).concat( this.parent.getScope() );
@@ -357,6 +358,10 @@ export class Figure {
 
     declare( node ) {
         this.declarations.push( node );
+    }
+
+    declareContext( node ) {
+        this.contexts.push( node );
     }
 
     construct( node ) {

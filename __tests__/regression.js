@@ -38,7 +38,7 @@ it( 'should update all values', async() => {
     expect( RegressionParentValues.html ).toBe( '<p>1</p><p>1</p><p>111</p>' );
 
     RegressionParentValues.component.update( { value: 2 } );
-    expect( RegressionParentValues.component.container.innerHTML ).toBe(
+    expect( RegressionParentValues.component.ctx.container.innerHTML ).toBe(
         '<p>2</p><p>2</p><p>222</p>'
     );
 
@@ -58,17 +58,17 @@ it( 'should update all values', async() => {
     expect( RegressionParentValuesComplex.html ).toBe( '<p>5</p><p>-1</p><p>66</p>' );
 
     RegressionParentValuesComplex.component.update( { a: 4 } );
-    expect( RegressionParentValuesComplex.component.container.innerHTML ).toBe(
+    expect( RegressionParentValuesComplex.component.ctx.container.innerHTML ).toBe(
         '<p>7</p><p>1</p><p>1212</p>'
     );
 
     RegressionParentValuesComplex.component.update( { b: 1 } );
-    expect( RegressionParentValuesComplex.component.container.innerHTML ).toBe(
+    expect( RegressionParentValuesComplex.component.ctx.container.innerHTML ).toBe(
         '<p>5</p><p>3</p><p>44</p>'
     );
 
     RegressionParentValuesComplex.component.update( { a: 2, b: 2 } );
-    expect( RegressionParentValuesComplex.component.container.innerHTML ).toBe(
+    expect( RegressionParentValuesComplex.component.ctx.container.innerHTML ).toBe(
         '<p>4</p><p>0</p><p>44</p>'
     );
 } );
@@ -94,7 +94,7 @@ it( 'should update variables in nested views', async() => {
     expect( html ).toBe( '<p>1<!--0-->1<!--0-->1<!--0--></p>' );
 
     component.update( { value: 7 } );
-    expect( component.container.innerHTML ).toBe( '<p>7<!--0-->7<!--0-->7<!--0--></p>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<p>7<!--0-->7<!--0-->7<!--0--></p>' );
 } );
 
 it( 'if with custom tag', async() => {
@@ -114,10 +114,12 @@ it( 'if with custom tag', async() => {
     expect( html ).toBe( '<div><div> Custom tag </div><!--0--></div>' );
 
     component.update( { test: false } );
-    expect( component.container.innerHTML ).toBe( '<div></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div></div>' );
 
     component.update( { test: true } );
-    expect( component.container.innerHTML ).toBe( '<div><div> Custom tag </div><!--0--></div>' );
+    expect( component.ctx.container.innerHTML ).toBe(
+        '<div><div> Custom tag </div><!--0--></div>'
+    );
 } );
 
 it( 'for with custom tag', async() => {
@@ -140,10 +142,10 @@ it( 'for with custom tag', async() => {
     );
 
     component.update( { array: [] } );
-    expect( component.container.innerHTML ).toBe( '<div></div>' );
+    expect( component.ctx.container.innerHTML ).toBe( '<div></div>' );
 
     component.update( { array: [ 1, 3 ] } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         '<div><div> Custom tag </div><!--0--><div> Custom tag </div><!--0--></div>'
     );
 } );
@@ -237,7 +239,7 @@ it( 'should cache options variable data for loops', async() => {
     };
 
     component.update( data2 );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         //eslint-disable-next-line max-len
         '<ul><li><span>USD</span>: US dollar</li><!--0--><li><span>EUR</span>: Euro</li><!--0--><li class="selected"><span>AUD</span>: Australian dollar</li><!--0--></ul>'
     );
@@ -339,7 +341,7 @@ it( 'loops with cond and outer scope', async() => {
     component.update( {
         outer: 'outer2'
     } );
-    expect( component.container.innerHTML ).toBe(
+    expect( component.ctx.container.innerHTML ).toBe(
         //eslint-disable-next-line max-len
         '<div><span>name1</span><span>value1</span><span>outer2</span><!--0--><span>name2</span><span>value2</span><span>outer2</span><!--0--></div>'
     );

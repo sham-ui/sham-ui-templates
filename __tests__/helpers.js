@@ -1,4 +1,4 @@
-import { start, createDI } from 'sham-ui';
+import { start, createDI, createRootContext } from 'sham-ui';
 import setupUnsafe from 'sham-ui-unsafe';
 import { Compiler } from '../src/index';
 import { sourceNode } from '../src/compiler/sourceNode';
@@ -89,7 +89,7 @@ export function compileAsSFC( strings ) {
     return evalComponent( code );
 }
 
-export function renderComponent( componentConstructor, options = {} ) {
+export function renderComponent( componentConstructor, options = {}, ctx = {} ) {
     const DI = 'DI' in options ?
         options.DI :
         createDI()
@@ -98,12 +98,13 @@ export function renderComponent( componentConstructor, options = {} ) {
     DI.resolve( 'sham-ui:store' ).byId.clear();
     const body = document.querySelector( 'body' );
     body.innerHTML = '';
-    const component = new componentConstructor( {
+    const context = createRootContext( {
         DI,
         ID: 'dummy',
         container: body,
-        ...options
+        ...ctx
     } );
+    const component = new componentConstructor( context, options );
     start( DI );
     return {
         DI,
