@@ -1,3 +1,6 @@
+## 6.0.0-alpha.3
+* Update dependencies
+
 ## 6.0.0-alpha.1
 * Update browserslist 
 * Move some blueprint codes from `for` compiler to runtime
