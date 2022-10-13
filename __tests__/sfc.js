@@ -158,3 +158,39 @@ it( 'should work with class property in if', () => {
     expect( html ).toBe( '<span>Joh Smith</span><!--0-->' );
 } );
 
+it( 'should work with owner method', () => {
+    window.Inner = compile`<p>{{label}}: {{dataGetter.bind( this, value )()}}</p>`;
+
+    const { html, component } = renderComponent(
+        compileAsSFC`
+        <template>
+            {% if show %}
+                <Inner 
+                    label={{label}}
+                    value={{1}}
+                    dataGetter={{this$.increment}}
+                />
+            {% endif %}
+        </template>
+        
+        <script>
+            export default Component( Template, function() {
+                this$.increment = ( value ) => value + 1;
+            } );
+        </script>
+        `,
+        {
+            label: 'Value',
+            show: true
+        }
+    );
+    expect( html ).toBe( '<p>Value: 2</p><!--0--><!--0-->' );
+    component.update( { show: false } );
+    component.update( { show: true } );
+    expect(  document.querySelector( 'body' ).innerHTML ).toBe(
+        '<p>Value: 2</p><!--0--><!--0-->'
+    );
+
+    delete window.Inner;
+} );
+
