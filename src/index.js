@@ -5,6 +5,7 @@ import { defaultBlock } from './transform/defaultblock';
 import { useBlockWithCompound } from './transform/useblock';
 import { sfc } from './transform/sfc';
 import { thisDollarSign } from './transform/this-dollar-sign';
+import { stateDollarSign } from './transform/state-dollar-sign';
 import { whitespace } from './optimize/whitespace';
 import { getTemplateName } from './utils';
 import { drawGraph } from './graph';
@@ -20,6 +21,7 @@ export class Compiler {
             whitespace,
             entity,
             thisDollarSign,
+            stateDollarSign,
             defaultBlock,
             useBlockWithCompound,
             sfc

@@ -20,7 +20,7 @@ function replaceBodyToUseDefaultBlock( node ) {
     const useBlockNode = node.body.find( x => 'UseBlockStatement' === x.type );
     if ( undefined === useBlockNode ) {
         const useDefaultBlockNode = new ast.UseBlockStatementNode(
-            new ast.LiteralNode( '\'default\'' ),
+            'default',
             null,
             false,
             node.body,

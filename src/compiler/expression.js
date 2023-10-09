@@ -39,13 +39,16 @@ function buildBindContextAndCallee( bind, figure, compile ) {
     return { context, callee };
 }
 
-function hasThisExpression( node ) {
+function hasThisRef( node ) {
     let has = false;
     if ( node ) {
         const nodes = [].concat( node );
         nodes.forEach( ( node ) => {
             visit( node, {
                 ThisExpression() {
+                    has = true;
+                },
+                StateExpression() {
                     has = true;
                 }
             } );
@@ -75,7 +78,7 @@ export default {
 
         let variables = collectVariables( figure.getScope(), node.expression );
 
-        if ( variables.length === 0 && !hasThisExpression( node.expression ) ) {
+        if ( variables.length === 0 && !hasThisRef( node.expression ) ) {
             figure.construct(
                 sourceNode(
                     node.loc,
@@ -294,6 +297,23 @@ export default {
 
     ThisExpression: ( { node } ) => {
         return sourceNode( node.loc, 'this.ctx.owner' );
+    },
+
+    StateExpression: ( { node, figure } ) => {
+        figure.addStateRef();
+        return sourceNode( node.loc, 'this.ctx.owner[ $.state ]' );
+    },
+
+    FunctionExpression: ( { node, compile } ) => {
+        const sn = sourceNode( node.loc, '( ( ' );
+        for ( let i = 0; i < node.arguments.length; i++ ) {
+            if ( i !== 0 ) {
+                sn.add( ', ' );
+            }
+            sn.add( compile( node.arguments[ i ] ) );
+        }
+        sn.add( [ ' ) => ', compile( node.body ), ' )' ] );
+        return sn;
     },
 
     Identifier: ( { node } ) => {

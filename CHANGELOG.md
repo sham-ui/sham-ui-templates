@@ -1,3 +1,12 @@
+## master
+* Alternative syntax for useblock:
+ ```
+ {% title %}
+ 
+ {% end title %}
+ ```
+* Add support arrow function as expression
+
 ## 6.0.0-alpha.6
 * Update dependencies
 

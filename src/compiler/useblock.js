@@ -1,6 +1,6 @@
 import { sourceNode } from './sourceNode';
 import { Figure } from '../figure';
-import { notNull, getStringLiteralValue, getTemplateName } from '../utils';
+import { notNull, getTemplateName } from '../utils';
 
 export default {
     UseBlockStatement: ( { node, parent, figure, compile } ) => {
@@ -14,7 +14,7 @@ export default {
         figure.addRuntimeImport( 'insert' );
 
         const parentName = getTemplateName( parent.name );
-        const blockName = getStringLiteralValue( node.name );
+        const blockName = node.name;
         const templateName = `${figure.name}_${parentName}_block_${blockName}_${figure.uniqid( 'template_name' )}`;
         const childName = 'child' + figure.uniqid( 'child_name' );
         figure.declareContext( `const ${childName} = createBlockContext( this );` );

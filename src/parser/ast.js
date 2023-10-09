@@ -126,6 +126,11 @@ function ThisExpressionNode( loc ) {
     this.loc = loc;
 }
 
+function StateExpressionNode( loc ) {
+    this.type = 'StateExpression';
+    this.loc = loc;
+}
+
 function ArrayExpressionNode( elements, loc ) {
     this.type = 'ArrayExpression';
     this.elements = elements;
@@ -214,6 +219,13 @@ function MemberExpressionNode( object, property, computed, loc ) {
     this.loc = loc;
 }
 
+function FunctionExpressionNode( args, body, loc ) {
+    this.type = 'FunctionExpression';
+    this.arguments = args;
+    this.body = body;
+    this.loc = loc;
+}
+
 function IdentifierNode( name, loc ) {
     this.type = 'Identifier';
     this.name = name;
@@ -252,6 +264,7 @@ ast.LetStatementNode = LetStatementNode;
 ast.FilterExpressionNode = FilterExpressionNode;
 ast.BindExpressionNode = BindExpressionNode;
 ast.ThisExpressionNode = ThisExpressionNode;
+ast.StateExpressionNode = StateExpressionNode;
 ast.ArrayExpressionNode = ArrayExpressionNode;
 ast.ObjectExpressionNode = ObjectExpressionNode;
 ast.SequenceExpressionNode = SequenceExpressionNode;
@@ -264,6 +277,7 @@ ast.ConditionalExpressionNode = ConditionalExpressionNode;
 ast.NewExpressionNode = NewExpressionNode;
 ast.CallExpressionNode = CallExpressionNode;
 ast.MemberExpressionNode = MemberExpressionNode;
+ast.FunctionExpressionNode = FunctionExpressionNode;
 ast.IdentifierNode = IdentifierNode;
 ast.AccessorNode = AccessorNode;
 ast.LiteralNode = LiteralNode;

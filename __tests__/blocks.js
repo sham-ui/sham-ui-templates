@@ -494,3 +494,47 @@ it( 'should work with block data', () => {
 
     delete window.Label;
 } );
+
+it( 'should work wit {% blockName %} syntax', () => {
+    window.Label = compile`
+        <span>{% defblock 'content' %}</span>
+    `;
+
+    const { html } = renderComponent(
+        compile`
+            <Label>
+                {% content %}
+                    Block data: {{ text }}
+                {% end content %}
+            </Label>
+        `,
+        {
+            text: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span> Block data: foo <!--0--></span><!--0-->' );
+
+    delete window.Label;
+} );
+
+it( 'should work wit {% blockName %} syntax and block data', () => {
+    window.Label = compile`
+        <span>{% defblock 'content' { text: text + '!' } %}</span>
+    `;
+
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}>
+                {% content with labelData %}
+                    Block data: {{labelData.text}}
+                {% end content %}
+            </Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span> Block data: foo! <!--0--></span><!--0-->' );
+
+    delete window.Label;
+} );

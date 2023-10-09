@@ -1,4 +1,3 @@
-import { getStringLiteralValue } from '../utils';
 import { visit } from '../visitor';
 import { HTMLElements, SVGElements } from '../compiler/element';
 import { ast } from '../parser';
@@ -17,7 +16,7 @@ export function useBlockWithCompound( ast ) {
 }
 
 function addUniqBlockDataName( node ) {
-    const blockName = getStringLiteralValue( node.name  );
+    const blockName = node.name;
     if ( !uniqcounters[ blockName ] ) {
         uniqcounters[ blockName ] = 0;
     }

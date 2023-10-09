@@ -42,6 +42,11 @@ function parseNumericLiteral( literal ) {
     }
 }
 
+// eslint-disable-next-line no-unused-vars
+function getStringLiteralValue( literal ) {
+    return literal.value.replace( /^["']/, '' ).replace( /["']$/, '' );
+}
+
 /* Begin Parser Customization Methods */
 // eslint-disable-next-line no-undef
 var originalParseMethod = parser.parse;

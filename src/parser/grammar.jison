@@ -121,11 +121,13 @@ AttributeText [^\"{]+
 <expr>"false"                      return "FALSE";
 <expr>"null"                       return "NULL";
 <expr>"this"                       return "THIS";
+<expr>"state"                      return "STATE";
 <expr>"unsafe"                     return "UNSAFE";
 <expr>"defblock"                   return "DEFBLOCK"
 <expr>"block"                      return "BLOCK"
 <expr>"with"                       return "WITH"
 <expr>"endblock"                   return "ENDBLOCK"
+<expr>"end"                        return "END"
 <expr>"let"                        return "LET"
 <expr>{Identifier}                 return "IDENTIFIER";
 <expr>{DecimalLiteral}             return "NUMERIC_LITERAL";
@@ -144,6 +146,7 @@ AttributeText [^\"{]+
 <expr>"::"                         return "::";
 <expr>":"                          return ":";
 <expr>"==="                        return "===";
+<expr>"=>"                         return "=>";
 <expr>"=="                         return "==";
 <expr>"="                          return "=";
 <expr>"!=="                        return "!==";
@@ -373,7 +376,6 @@ DebuggerStatement
         }
     ;
 
-
 DefBlockStatement
     :  "{%" DEFBLOCK Expression "%}"
         {
@@ -406,13 +408,35 @@ DefBlockStatement
     ;
 
 UseBlockStatement
-    :  "{%" BLOCK StringLiteral WITH IdentifierName "%}" ElementList "{%" ENDBLOCK "%}"
+    :  "{%" IDENTIFIER WITH IdentifierName "%}" ElementList "{%" END IDENTIFIER "%}"
         {
-            $$ = new UseBlockStatementNode($3, $5, true, $7, createSourceLocation(@1, @8));
+            if ($2 == $9) {
+                $$ = new UseBlockStatementNode( $2, $4, true, $6, createSourceLocation(@1, @10) );
+            } else {
+                throw new SyntaxError(
+                    "Syntax error on line " + (yylineno + 1) + ":\n" +
+                    "Block names should be same ({% " + $2 + " %} != {% end " + $9 + " %})"
+                );
+            }
+        }
+    |  "{%" IDENTIFIER "%}" ElementList "{%" END IDENTIFIER "%}"
+        {
+            if ($2 == $7) {
+                $$ = new UseBlockStatementNode( $2, null, false, $4, createSourceLocation(@1, @8) );
+            } else {
+                throw new SyntaxError(
+                    "Syntax error on line " + (yylineno + 1) + ":\n" +
+                    "Block names should be same ({% " + $2 + " %} != {% end " + $7 + " %})"
+                );
+            }
+        }
+    |  "{%" BLOCK StringLiteral WITH IdentifierName "%}" ElementList "{%" ENDBLOCK "%}"
+        {
+            $$ = new UseBlockStatementNode( getStringLiteralValue($3), $5, true, $7, createSourceLocation(@1, @8));
         }
     |  "{%" BLOCK StringLiteral "%}" ElementList "{%" ENDBLOCK "%}"
         {
-            $$ = new UseBlockStatementNode( $3, null, false, $5, createSourceLocation(@1, @8) );
+            $$ = new UseBlockStatementNode( getStringLiteralValue($3), null, false, $5, createSourceLocation(@1, @8) );
         }
     ;
 
@@ -521,17 +545,68 @@ PrimaryExpression
         {
             $$ = new ThisExpressionNode(createSourceLocation(@1, @1));
         }
+    | "STATE"
+        {
+            $$ = new StateExpressionNode(createSourceLocation(@1, @1));
+        }
     | "IDENTIFIER"
         {
             $$ = new IdentifierNode($1, createSourceLocation(@1, @1));
         }
     | Literal
     | ArrayLiteral
-    | "(" Expression ")"
+    | ObjectLiteral
+    | ParenthisizedExpression
+    | "IDENTIFIER" "=>" AssignmentExpression
+        {
+            $$ = new FunctionExpressionNode(
+                [ new IdentifierNode($1, createSourceLocation(@1, @1)) ],
+                $3,
+                createSourceLocation(@1, @3)
+            );
+        }
+    | ParenthisizedExpression "=>" AssignmentExpression
+        {
+            var args = [];
+            if ( $1.type == "Identifier" ) {
+                args = [ $1 ];
+            } else if ( $1.type == "SequenceExpression" ) {
+                args = $1.expressions
+                for ( let i = 0; i < args.length; i++ ) {
+                    if ( args[ i ].type !== "Identifier" ) {
+                        throw new SyntaxError(
+                            "Syntax error on line " + (yylineno + 1) + ":\n" +
+                            "Arrow function argument should be Identifier, got " + args[ i ].type
+                        );
+                    }
+                }
+            } else {
+                throw new SyntaxError(
+                    "Syntax error on line " + (yylineno + 1) + ":\n" +
+                    "Arrow function arguments should be Identifier, or SequenceExpression got " + $1.type
+                );
+            }
+            $$ = new FunctionExpressionNode(
+                args,
+                $3,
+                createSourceLocation(@1, @3)
+            );
+        }
+    | "(" ")" "=>" AssignmentExpression
+        {
+            $$ = new FunctionExpressionNode(
+                [],
+                $4,
+                createSourceLocation(@1, @4)
+            );
+        }
+    ;
+
+ParenthisizedExpression
+    : "(" Expression ")"
         {
             $$ = $2;
         }
-    | ObjectLiteral
     ;
 
 
@@ -1076,6 +1151,7 @@ ReservedWord
     | "RETURN"
     | "SWITCH"
     | "THIS"
+    | "STATE"
     | "THROW"
     | "TRY"
     | "TYPEOF"

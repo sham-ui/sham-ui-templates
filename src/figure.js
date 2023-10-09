@@ -24,6 +24,7 @@ export class Figure {
         this.onRemove = [];
         this.blocks = {};
         this.domRef = false;
+        this.stateRef = false;
         this.withDebugger = false;
         this.runtimeImports = new Set();
         if ( parent === null ) {
@@ -63,6 +64,8 @@ export class Figure {
 
         if ( this.onRemove.length > 0 ) {
             sn.add( '( options, didMount ) {\n' );
+        } else if ( this.stateRef ) {
+            sn.add( '( options ) {\n' );
         } else {
             sn.add( '() {\n' );
         }
@@ -72,6 +75,13 @@ export class Figure {
         if ( null === this.parent ) {
             sn.add( [
                 '    this.isRoot = true;\n',
+                '\n'
+            ] );
+        }
+
+        if ( this.stateRef ) {
+            sn.add( [
+                '    this[ $.state ] = options();\n',
                 '\n'
             ] );
         }
@@ -388,6 +398,10 @@ export class Figure {
 
     addRuntimeImport( name ) {
         this.root().runtimeImports.add( name );
+    }
+
+    addStateRef() {
+        this.root().stateRef = true;
     }
 
     addOnUpdate( node ) {
