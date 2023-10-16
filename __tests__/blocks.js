@@ -25,14 +25,14 @@ afterEach( () => {
     delete window.TextContent;
 } );
 
-it( 'should work with {% block "default" %}', () => {
+it( 'should work with {% default %}', () => {
     const { html } = renderComponent(
         compile`
             <div>
                 <LinkTo>
-                    {% block 'default' %}
+                    {% default %}
                         Text for content
-                    {% endblock %}
+                    {% end default %}
                 </LinkTo>
             </div>
         `,
@@ -47,7 +47,7 @@ it( 'should work with two named blocks', () => {
     window.CustomPanel = compile`
         <div>
             <div class="title">
-                {% defblock 'title' %}
+                {% defblock title %}
             </div>
             <div class="content">
                 {% defblock %}
@@ -58,13 +58,13 @@ it( 'should work with two named blocks', () => {
         compile`
             <div>
                 <CustomPanel>
-                    {% block 'title' %}
+                    {% title %}
                         Text for title
-                    {% endblock %}
+                    {% end title %}
 
-                    {% block 'default' %}
+                    {% default %}
                         Text for content
-                    {% endblock %}
+                    {% end default %}
                 </CustomPanel>
             </div>
         `,
@@ -82,9 +82,9 @@ it( 'should work with component arguments', () => {
         compile`
             <div>
                 <LinkTo url={{url}}>
-                    {% block 'default' %}
+                    {% default %}
                         Text for {{url}}
-                    {% endblock %}
+                    {% end default %}
                 </LinkTo>
             </div>
         `,
@@ -481,9 +481,9 @@ it( 'should work with block data', () => {
     const { html } = renderComponent(
         compile`
             <Label text={{textForLabel}}>
-                {% block 'default' with labelData %}
+                {% default with labelData %}
                     Block data: {{labelData.text}}
-                {% endblock %}
+                {% end default %}
             </Label>
         `,
         {
@@ -497,7 +497,7 @@ it( 'should work with block data', () => {
 
 it( 'should work wit {% blockName %} syntax', () => {
     window.Label = compile`
-        <span>{% defblock 'content' %}</span>
+        <span>{% defblock content %}</span>
     `;
 
     const { html } = renderComponent(
@@ -519,7 +519,7 @@ it( 'should work wit {% blockName %} syntax', () => {
 
 it( 'should work wit {% blockName %} syntax and block data', () => {
     window.Label = compile`
-        <span>{% defblock 'content' { text: text + '!' } %}</span>
+        <span>{% defblock content { text: text + '!' } %}</span>
     `;
 
     const { html } = renderComponent(
@@ -537,4 +537,231 @@ it( 'should work wit {% blockName %} syntax and block data', () => {
     expect( html ).toBe( '<span> Block data: foo! <!--0--></span><!--0-->' );
 
     delete window.Label;
+} );
+
+it( 'should work with default blocks & usage block', () => {
+    window.Label = compile`
+        <span>
+            {{ text }}
+            {% block %}
+                Default value
+            {% endblock %}
+        </span>
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}>
+                Not default!
+            </Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span>foo Not default! <!--0--></span><!--0-->' );
+
+} );
+
+it( 'should work with default blocks & not usage block', () => {
+    window.Label = compile`
+        <span>
+            {{ text }}
+            {% block content %}
+                Default value
+            {% endblock %}
+        </span>
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}></Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span>foo Default value <!--0--></span><!--0-->' );
+} );
+
+it( 'should work with default block "default" & not usage block', () => {
+    window.Label = compile`
+        <span>
+            {{ text }}
+            {% block %}
+                Default value
+            {% endblock %}
+        </span>
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}></Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span>foo Default value <!--0--></span><!--0-->' );
+} );
+
+it( 'should work with default block "default" & not usage block in onetag component', () => {
+    window.Label = compile`
+        <span>
+            {{ text }}
+            {% block %}
+                Default value
+            {% endblock %}
+        </span>
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}/>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span>foo Default value <!--0--></span><!--0-->' );
+} );
+
+
+it( 'should work with default block with variable & not usage block', () => {
+    window.Label = compile`
+        <span>
+            {% block %}
+                Default value and {{text}}
+            {% endblock %}
+        </span>
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}></Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span> Default value and foo <!--0--></span><!--0-->' );
+} );
+
+it( 'should work with default block with variable & usage block', () => {
+    window.Label = compile`
+        <span>
+            {% block %}
+                Default value and {{text}}
+            {% endblock %}
+        </span>
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}>
+                Custom
+            </Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    expect( html ).toBe( '<span> Custom <!--0--></span><!--0-->' );
+} );
+
+it( 'should work with default block with variable & update', () => {
+    window.Label = compile`
+        <span>
+            {% block %}
+                Default value and {{text}}
+            {% endblock %}
+        </span>
+    `;
+    const { component } = renderComponent(
+        compile`
+            <Label text={{textForLabel}}></Label>
+        `,
+        {
+            textForLabel: 'foo'
+        }
+    );
+    component.update( { textForLabel: 'bar' } );
+    expect( component.ctx.container.innerHTML ).toBe(
+        '<span> Default value and bar <!--0--></span><!--0-->'
+    );
+} );
+
+it( 'should work with default block two level & usage inner level', () => {
+    window.Label = compile`
+        {% block buttons %}
+            {% block ok %}
+                {{ ok }}
+            {% endblock %}
+        
+            {% block cancel %}
+                Cancel
+            {% endblock %}
+        {% endblock %}
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label ok={{textForOk}}>
+                {% ok %}
+                    Confirm
+                {% end ok %}
+            </Label>
+        `,
+        {
+            textForOk: 'foo'
+        }
+    );
+    expect( html ).toBe(
+        '  Confirm <!--0-->  Cancel <!--1--> <!--0--><!--0-->'
+    );
+} );
+
+
+it( 'should work with default block two level & usage outer level', () => {
+    window.Label = compile`
+        {% block buttons %}
+            {% block ok %}
+                {{ ok }}
+            {% endblock %}
+        
+            {% block cancel %}
+                Cancel
+            {% endblock %}
+        {% endblock %}
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label ok={{textForOk}}>
+                {% buttons %}
+                    Loader
+                {% end buttons %}
+            </Label>
+        `,
+        {
+            textForOk: 'foo'
+        }
+    );
+    expect( html ).toBe( ' Loader <!--0--><!--0-->' );
+} );
+
+
+it( 'should work with default block two level & not usage', () => {
+    window.Label = compile`
+        {% block buttons %}
+            {% block ok %}
+                {{ ok }}
+            {% endblock %}
+        
+            {% block cancel %}
+                Cancel
+            {% endblock %}
+        {% endblock %}
+    `;
+    const { html } = renderComponent(
+        compile`
+            <Label ok={{textForOk}}/>
+        `,
+        {
+            textForOk: 'OK'
+        }
+    );
+    expect( html ).toBe( '  OK <!--0-->  Cancel <!--1--> <!--0--><!--0-->' );
 } );

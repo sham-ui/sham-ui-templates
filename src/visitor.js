@@ -116,6 +116,9 @@ const visitors = {
     DefBlockStatement: ( node, visitor ) => {
         handle( node, visitor );
         visit( node.expression, visitor );
+        for ( let i = 0; i < node.body.length; i++ ) {
+            visit( node.body[ i ], visitor );
+        }
         handleExit( node, visitor );
     },
     UseBlockStatement: ( node, visitor ) => {

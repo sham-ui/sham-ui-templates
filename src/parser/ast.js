@@ -78,10 +78,11 @@ function DebuggerStatementNode( loc ) {
     this.loc = loc;
 }
 
-function DefBlockStatementNode( name, expression, loc ) {
+function DefBlockStatementNode( name, expression, body, loc ) {
     this.type = 'DefBlockStatement';
     this.name = name;
     this.expression = expression;
+    this.body = body;
     this.loc = loc;
 }
 

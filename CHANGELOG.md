@@ -1,10 +1,26 @@
 ## master
-* Alternative syntax for useblock:
+* New syntax for useblock:
  ```
  {% title %}
  
  {% end title %}
  ```
+* New syntax for define block:
+ ```
+ {% defblock title %}
+ ```
+* Add default content for defined block:
+ ```
+ // Dummy.sht
+ {% block content %}
+    Default content  
+ {% endblock %}
+ 
+ // UseDummy.sht
+ <Dummy />
+ 
+ // Will render 'Default content' string
+ ``` 
 * Add support arrow function as expression
 
 ## 6.0.0-alpha.6

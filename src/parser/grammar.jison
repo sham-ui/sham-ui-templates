@@ -377,31 +377,66 @@ DebuggerStatement
     ;
 
 DefBlockStatement
-    :  "{%" DEFBLOCK Expression "%}"
+    :  "{%" BLOCK Expression "%}" ElementList "{%" ENDBLOCK "%}"
         {
             $$ = new DefBlockStatementNode(
-                new LiteralNode("'default'", createSourceLocation(@1, @3)),
+                'default',
                 $3,
-                createSourceLocation(@1, @4)
+                $5,
+                createSourceLocation(@1, @8)
             );
         }
-    |  "{%" DEFBLOCK StringLiteral Expression "%}"
+    |  "{%" BLOCK IDENTIFIER Expression "%}" ElementList "{%" ENDBLOCK "%}"
         {
-            $$ = new DefBlockStatementNode($3, $4, createSourceLocation(@1, @5));
+            $$ = new DefBlockStatementNode( $3, $4, $6, createSourceLocation(@1, @9) );
         }
-    |  "{%" DEFBLOCK StringLiteral "%}"
+    |  "{%" BLOCK IDENTIFIER "%}" ElementList "{%" ENDBLOCK "%}"
         {
             $$ = new DefBlockStatementNode(
                 $3,
                 new ObjectExpressionNode([], createSourceLocation(@1, @4)),
+                $5,
+                createSourceLocation(@1, @8)
+            );
+        }
+    |  "{%" BLOCK "%}" ElementList "{%" ENDBLOCK "%}"
+        {
+            $$ = new DefBlockStatementNode(
+                'default',
+                new ObjectExpressionNode([], createSourceLocation(@1, @3)),
+                $4,
+                createSourceLocation(@1, @7)
+            );
+        }
+    |  "{%" DEFBLOCK Expression "%}"
+        {
+            $$ = new DefBlockStatementNode(
+                'default',
+                $3,
+                [],
+                createSourceLocation(@1, @4)
+            );
+        }
+
+    |  "{%" DEFBLOCK IDENTIFIER Expression "%}"
+        {
+            $$ = new DefBlockStatementNode($3, $4, [], createSourceLocation(@1, @5));
+        }
+    |  "{%" DEFBLOCK IDENTIFIER "%}"
+        {
+            $$ = new DefBlockStatementNode(
+                $3,
+                new ObjectExpressionNode([], createSourceLocation(@1, @4)),
+                [],
                 createSourceLocation(@1, @4)
             );
         }
     | "{%" DEFBLOCK "%}"
         {
             $$ = new DefBlockStatementNode(
-                new LiteralNode("'default'", createSourceLocation(@1, @3)),
+                'default',
                 new ObjectExpressionNode([], createSourceLocation(@1, @3)),
+                [],
                 createSourceLocation(@1, @3)
             );
         }
@@ -429,14 +464,6 @@ UseBlockStatement
                     "Block names should be same ({% " + $2 + " %} != {% end " + $7 + " %})"
                 );
             }
-        }
-    |  "{%" BLOCK StringLiteral WITH IdentifierName "%}" ElementList "{%" ENDBLOCK "%}"
-        {
-            $$ = new UseBlockStatementNode( getStringLiteralValue($3), $5, true, $7, createSourceLocation(@1, @8));
-        }
-    |  "{%" BLOCK StringLiteral "%}" ElementList "{%" ENDBLOCK "%}"
-        {
-            $$ = new UseBlockStatementNode( getStringLiteralValue($3), null, false, $5, createSourceLocation(@1, @8) );
         }
     ;
 
