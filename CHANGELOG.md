@@ -1,4 +1,4 @@
-## master
+## 6.0.0-alpha.7
 * New syntax for useblock:
  ```
  {% title %}
