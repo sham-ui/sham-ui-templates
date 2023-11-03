@@ -1,3 +1,6 @@
+## 6.0.0
+* Release
+
 ## 6.0.0-alpha.7
 * New syntax for useblock:
  ```
